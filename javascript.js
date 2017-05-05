@@ -2,35 +2,39 @@
 var canvas = document.getElementById('canvas');
 var ctx=canvas.getContext('2d');
 canvas.style.backgroundColor = 'rgba(158, 167, 184, 0.2)';
-/*base_image = new Image();
-base_image.src = 'bonhomme.png';
-ctx.drawImage(base_image, 50, 50);*/
-/*ctx.rect(20, 20, 150, 100);
-ctx.fillStyle = 'green';
-ctx.fill();*/
 
 var xhr = new XMLHttpRequest();
 var xhr2 = new XMLHttpRequest();
 
+/* 
+    Function used to read the map in JSON format and color the rooms 
+*/
+
+
 xhr.onreadystatechange = function() {
     if (xhr.readyState == XMLHttpRequest.DONE) {
         var json_world = JSON.parse(xhr.responseText);
-/*
-
-        for (var i = 0; i < json_world.length; i++){
-            var room = json_world[i];
-            ctx.fillStyle = room['color'];
-            ctx.fillRect(room['points'][0][0], room['points'][0][1], room['points'][1], room['points'][2]);
-            
-        }
-       */ json_world.forEach(function(room){
+            json_world.forEach(function(room){
             if (room.hasOwnProperty("name")){
-                ctx.fillStyle = room['color'];
-                ctx.fillRect(room['points'][0][0], room['points'][0][1], room['points'][1], room['points'][2]);
+                if(room.visible === "yes"){                                 // If the user has already passed or its the first time
+                    if(room.name === "cementery"){                          // Draw the cementery image if its the case
+                        cementery_image = new Image();
+                        cementery_image.src = 'cementerio.jpg';
+                        cementery_image.onload = function(){
+                            ctx.drawImage(cementery_image, 350, 100);
+                            xhr2.open('GET', '/game.php?command=where', true);
+                            xhr2.send(null);
+                        }
+                    }else{
+                        ctx.fillStyle = room['color'];
+                        ctx.fillRect(room['points'][0][0], room['points'][0][1], room['points'][1], room['points'][2]);
+                        xhr2.open('GET', '/game.php?command=where', true);
+                        xhr2.send(null);
+                    }
+                }
             }
         })
-        xhr2.open('GET', '/hello.php?command=where', true);
-        xhr2.send(null);
+        
         
     }
 }
@@ -47,6 +51,5 @@ xhr2.onreadystatechange = function() {
     }
 }
 
-xhr.open('GET', '/hello.php?command=map', true);
+xhr.open('GET', '/game.php?command=map', true);
 xhr.send(null);
-
